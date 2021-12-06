@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/brunopeppe03/Whatsapp#readme",
   "dependencies": {
+    "firebase": "^5.0.4",
+    "pdfjs-dist": "^2.0.489",
     "webpack": "^3.1.0",
     "webpack-dev-server": "^2.5.1"
   }
