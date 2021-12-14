@@ -2,7 +2,8 @@ import { ClassEvent } from "../util/ClassEvent";
 
 export class ContactsController extends ClassEvent{
 
-    constructor(modalEl, user){
+    constructor(modalEl, user) {
+        super();
 
         this._user = user;
         this._modalEl = modalEl;
@@ -11,7 +12,8 @@ export class ContactsController extends ClassEvent{
     }
 
     open() {
-        this._user.getContacts().then(contacts => {
+        this._user.getContacts()
+        .then(contacts => {
             this._listEl.innerHTML = '';
 
             contacts.forEach(contact => {
@@ -78,8 +80,10 @@ export class ContactsController extends ClassEvent{
         this._modalEl.show();
 
     }
+
     close() {
         this._modalEl.hide();
+
     }
 
 }

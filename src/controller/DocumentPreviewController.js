@@ -1,104 +1,91 @@
 const pdfjsLib = require('pdfjs-dist');
 const path = require('path');
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = path.resolve(__dirname,
- "../../dist/pdf.worker.bundle.js");
+pdfjsLib.GlobalWorkerOptions.workerSrc = path.resolve(__dirname, '../../dist/pdf.worker.bundle.js');
 
 export class DocumentPreviewController {
 
-    constructor (file){
+    constructor(file) {
 
         this._file = file;
 
-
     }
 
-    getPreviewData(){
-
-        return new Promise((s, f) =>{
-
+    getPreviewData() {
+        return new Promise ((s, f) => {
             let reader = new FileReader()
 
-            switch(this._file.type) {
-
+            switch (this._file.type) {
                 case 'image/png':
                 case 'image/jpeg':
                 case 'image/jpg':
                 case 'image/gif':
-                reader.onload = e => {
-
-                    s({
-                        src: reader.result,
-                        info: this._file.name
-                    });
-
-                }
-                reader.oneerror = e => {
-
-                    f(e);
-
-                }
-                reader.readAsDataURL(this._file);
-                break;
+                    reader.onload = e => {
+                        s({
+                            src: reader.result,
+                            info: this._file.name
+                        });
+                    }
+                    reader.onerror = e => {
+                        f(e)
+                    }
+                    reader.readAsDataURL(this._file);
+                    break;
 
                 case 'application/pdf':
 
-                     reader.onload = e =>{
 
-                        pdfjsLib.getDocument(new Uint8Array(reader.result)).then(pdf => {
+                    reader.onload = e => {
 
-                            pdf.getPage(1).then(page => {
+                        pdfjsLib.getDocument(new Uint8Array(reader.result))
+                            .then(pdf => {
+                                pdf.getPage(1).then(page => {
 
-                              let viewport = page.getViewport(1);
+                                    let viewport = page.getViewport(1);
 
-                              let canvas = document.createElement('canvas');
-                              let cavasContext = canvas.getContext('2d');
+                                    let canvas = document.createElement('canvas');
+                                    let canvasContext = canvas.getContext('2d');
 
-                              canvas.width = viewport.width;
-                              canvas.height = viewport.height;
+                                    canvas.width = viewport.width;
+                                    canvas.height = viewport.height;
 
-                              page.render({
-                                    canvasContext : context,
-                                    viewport
+                                    page.render({
+                                        canvasContext,
+                                        viewport
 
-                                 }).then(()=>{
+                                    })
+                                    .then(() => {
 
-                                    let s = (pdf.numPages > 1) ? 's' : '';
+                                        let _s = (pdf.numPages > 1) ? 's' : '';
 
-                                    s({
-                                        src: cavas.toDataURL('image/png'),
-                                        info: `${pdf.numPages} pagina${_s}`
+                                        s({
+                                            src: canvas.toDataURL('image/png'),
+                                            info: `${pdf.numPages} pagina${_s}`
+                                        })
+                                    })
+                                    .catch(err => {
+                                        f(err);
+                                    })
 
-                                    });
+                                })
+                                .catch(err => {
+                                    f(err);
+                                });
+                            })
+                            .catch(err => {
+                                f(err)
+                            })
 
+                    }
 
-                                 }).catch(err=>{
+                    reader.readAsArrayBuffer(this._file)
 
-                                f(err);
+                    break;
 
-
-                            }).catch(err =>{
-                                f(err);
-
-                            });
-            
-                        }).catch(err=>{
-
-                            f(err);
-
-                        });
-                    reader.readAsArrayBuffer(this._file);
-                });
-
-                
-               
+                default:
+                    f()
             }
-            default:
-                f();
-          }
-
-      })
-
-   }
+        })
+    }
 
 }
